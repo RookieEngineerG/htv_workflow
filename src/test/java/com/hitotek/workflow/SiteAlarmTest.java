@@ -3,6 +3,7 @@ package com.hitotek.workflow;
 import com.hitotek.workflow.factory.DataFactory;
 import com.hitotek.workflow.model.multipart.MultipartData;
 import com.hitotek.workflow.service.ProcessHistoryService;
+import com.hitotek.workflow.service.ProcessInstanceService;
 import com.hitotek.workflow.service.ProcessTaskService;
 import com.hitotek.workflow.util.DateUtils;
 import com.sun.org.apache.xpath.internal.operations.Mult;
@@ -10,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.activiti.engine.*;
 import org.activiti.engine.history.*;
 import org.activiti.engine.impl.persistence.entity.data.impl.cachematcher.TasksByExecutionIdMatcher;
+import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
@@ -102,30 +104,52 @@ public class SiteAlarmTest {
 
     @Test
     public void completeSiteProcessTask() {
-        List<Task> tasks = taskService.createTaskQuery()
-                .processInstanceId("25001")
-                .list();
+        Task task = taskService.createTaskQuery()
+                .processInstanceId("5001")
+                .singleResult();
+        try {
+            processTaskService.findTaskById(task.getId());
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return;
+        }
+        String userId = "siteAdmin";
+
         // 参数封装
         MultipartData form = new MultipartData()
-                .include("userId", 1432)
+                .include("userId", userId)
                 .include("alarmId", 3332)
                 .include("remark", "没问题")
                 .include("photoUrl", "http://www.baidu.com/wangph.png")
                 .include("submitType", true)
                 .include("time", DateUtils.format(new Date(), FORMAT_DEFAULT));
-        try {
-            processTaskService.findTaskById(tasks.get(0).getId());
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return;
-        }
-        taskService.complete(tasks.get(0).getId(), form);
+
+        taskService.setAssignee(task.getId(), userId);
+        taskService.complete(task.getId(), form);
+    }
+
+    @Test
+    public void findUser () {
+        Task task = taskService.createTaskQuery()
+                .taskAssignee("kjgong")
+                .singleResult();
+        log.info("taskName [{}] taskAssignee [{}] taskDefinitionKey [{}]", task.getName(), task.getAssignee(), task.getTaskDefinitionKey());
+    }
+
+    @Test
+    public void setTaskAssignee () {
+        String userId = "kjgong";
+
+        Task task = taskService.createTaskQuery()
+                .processInstanceId("5001")
+                .singleResult();
+        taskService.setAssignee(task.getId(), userId);
     }
 
     @Test
     public void catTasksByProcessIntanceId() {
         List<Task> taskList = taskService.createTaskQuery()
-                .processInstanceId("25001")
+                .processInstanceId("5001")
                 .list();
         for (Task task : taskList) {
             log.info("taskId: [{}], taskName: [{}]", task.getId(), task.getName());
@@ -135,7 +159,7 @@ public class SiteAlarmTest {
     @Test
     public void completeDistrictApproveTask() {
         Task task = taskService.createTaskQuery()
-                .processInstanceId("25001")
+                .processInstanceId("5001")
                 .singleResult();
         log.info("taskId: [{}], taskName: [{}]", task.getId(), task.getName());
 
@@ -163,10 +187,10 @@ public class SiteAlarmTest {
                     historyService.createHistoricVariableInstanceQuery()
                             .processInstanceId(historicTaskInstance.getProcessInstanceId())
                             .list();
-            log.info("");
         }
         log.info("");
     }
+
 
 
 }
