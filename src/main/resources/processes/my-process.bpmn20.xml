@@ -6,7 +6,7 @@
 	xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema"
 	expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
 
-	<process id="my-process">
+	<process id="my-process" name="我的流程">
 
 		<startEvent id="start" />
 		<sequenceFlow id="flow1" sourceRef="start" targetRef="someTask" />

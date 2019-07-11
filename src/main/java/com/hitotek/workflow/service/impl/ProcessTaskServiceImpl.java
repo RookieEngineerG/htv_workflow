@@ -81,7 +81,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             taskService.complete(taskId);
             return DataFactory.createSuccess().message("完成任务[" + taskId + "]成功!");
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             return DataFactory.createError().message("完成任务[" + taskId + "]失败!");
         }
     }

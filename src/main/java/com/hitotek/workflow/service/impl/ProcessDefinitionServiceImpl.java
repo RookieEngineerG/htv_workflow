@@ -8,6 +8,7 @@ import com.hitotek.workflow.util.Strings;
 import com.hitotek.workflow.util.Values;
 import lombok.extern.slf4j.Slf4j;
 import org.activiti.engine.RepositoryService;
+import org.activiti.engine.RuntimeService;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,7 +42,7 @@ public class ProcessDefinitionServiceImpl implements ProcessDefinitionService {
                     .deploy();
             return DataFactory.createSuccess().message("我的流程，部署成功! ");
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             return DataFactory.createError().message("我的流程，部署失败! ");
         }
     }
@@ -61,7 +62,7 @@ public class ProcessDefinitionServiceImpl implements ProcessDefinitionService {
 
             return DataFactory.createSuccess().message("递归删除流程部署成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             return DataFactory.createError().message("递归删除流程部署失败");
         }
     }
@@ -73,30 +74,36 @@ public class ProcessDefinitionServiceImpl implements ProcessDefinitionService {
      */
     @Override
     public Data getProcessDefinitions(String deploymentId) {
-        List<ProcessDefinition> list;
-        if (Strings.isNullOrEmpty(deploymentId)) {
-            // 没有流程部署id, 则查询全部
-            list = repositoryService.createProcessDefinitionQuery()
-                    .orderByProcessDefinitionVersion()
-                    .desc()
-                    .list();
-        } else {
-            // 有流程部署id
-            list = repositoryService.createProcessDefinitionQuery()
-                    .deploymentId(deploymentId)
-                    .orderByProcessDefinitionVersion()
-                    .desc()
-                    .list();
+        try {
+            List<ProcessDefinition> list;
+            if (Strings.isNullOrEmpty(deploymentId)) {
+                // 没有流程部署id, 则查询全部
+                list = repositoryService.createProcessDefinitionQuery()
+                        .orderByProcessDefinitionVersion()
+                        .desc()
+                        .list();
+            } else {
+                // 有流程部署id
+                list = repositoryService.createProcessDefinitionQuery()
+                        .deploymentId(deploymentId)
+                        .orderByProcessDefinitionVersion()
+                        .desc()
+                        .list();
+            }
+            if (Values.isNull(list) || list.size() == 0) {
+                throw new RuntimeException("未获取到流程定义");
+            }
+            log.info("list.size() = {}", list.size());
+            List<MultipartData> data = new ArrayList<>();
+            for (ProcessDefinition processDefinition : list) {
+                data.add(new MultipartData().parties(processDefinition));
+            }
+            return DataFactory.createSuccess().data(data);
+        } catch (RuntimeException run) {
+            log.error(run.getMessage());
+            return DataFactory.createFail().message(run.getMessage());
         }
-        if (Values.isNull(list)) {
-            return DataFactory.createFail().message("未获取到流程定义");
-        }
-        log.info("size = {}", list.size());
-        List<MultipartData> data = new ArrayList<>();
-        for (ProcessDefinition processDefinition : list) {
-            data.add(new MultipartData().parties(processDefinition));
-        }
-        return DataFactory.createSuccess().data(data);
+
     }
 
     /**

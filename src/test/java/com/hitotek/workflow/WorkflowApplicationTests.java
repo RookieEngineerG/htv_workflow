@@ -42,10 +42,10 @@ public class WorkflowApplicationTests {
         // 部署流程
         RepositoryService repositoryService = processEngine.getRepositoryService();
         Deployment deploy = repositoryService.createDeployment()
-//                .addClasspathResource("processes/my-process.bpmn20.xml")
-                .addClasspathResource("processes/leave-request-process.bpmn20.xml")
+                .addClasspathResource("processes/my-process.bpmn20.xml")
+//                .addClasspathResource("processes/leave-request-process.bpmn20.xml")
 //                .addClasspathResource("processes/second-approve.bpmn20.xml")
-                .name("请假审批")
+                .name("我的流程")
                 .deploy();
 
 //        DeploymentQuery deploymentQuery = repositoryService.createDeploymentQuery();
@@ -137,7 +137,5 @@ public class WorkflowApplicationTests {
         }
 
     }
-
-
 
 }

@@ -34,7 +34,7 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
 
             return DataFactory.createSuccess().message("流程实例删除成功!");
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             return DataFactory.createError().message("流程实例删除失败!");
         }
     }
@@ -55,7 +55,7 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
             return DataFactory.createSuccess()
                     .data(new MultipartData().parties(processInstance));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             return DataFactory.createError().message("启动流程失败！");
         }
     }

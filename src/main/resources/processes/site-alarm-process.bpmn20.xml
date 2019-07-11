@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/processdef">
+  <process id="site-alarm-process" name="站点告警处理" isExecutable="true">
+    <startEvent id="startEvent" name="开始流程"></startEvent>
+    <userTask id="siteProcess" name="站点处理">
+      <extensionElements>
+        <activiti:formProperty id="userId" name="用户id" type="long" required="true"></activiti:formProperty>
+        <activiti:formProperty id="alarmId" name="告警id" type="long" required="true"></activiti:formProperty>
+        <activiti:formProperty id="remark" name="备注" type="string" required="true"></activiti:formProperty>
+        <activiti:formProperty id="photoUrl" name="图片地址" type="string"></activiti:formProperty>
+        <activiti:formProperty id="submitType" name="确认提交" type="boolean" required="true"></activiti:formProperty>
+        <activiti:formProperty id="time" name="处理时间" type="date" datePattern="MM-dd-yyyy hh:mm" required="true"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="sid-B8BEA361-BE38-463E-89BA-CB25494546DB" sourceRef="startEvent" targetRef="siteProcess"></sequenceFlow>
+    <userTask id="districtApprove" name="区县级审批">
+      <extensionElements>
+        <activiti:formProperty id="userId" name="用户id" type="long" required="true"></activiti:formProperty>
+        <activiti:formProperty id="alarmId" name="告警id" type="long" required="true"></activiti:formProperty>
+        <activiti:formProperty id="remark" name="备注" type="string" required="true"></activiti:formProperty>
+        <activiti:formProperty id="approve" name="是否批准" type="boolean" required="true"></activiti:formProperty>
+        <activiti:formProperty id="time" name="提交时间" type="date" datePattern="MM-dd-yyyy hh:mm" required="true"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <userTask id="cityApprove" name="市级审批">
+      <extensionElements>
+        <activiti:formProperty id="userId" name="用户id" type="long" required="true"></activiti:formProperty>
+        <activiti:formProperty id="alarmId" name="告警id" type="long" required="true"></activiti:formProperty>
+        <activiti:formProperty id="remark" name="备注" type="string" required="true"></activiti:formProperty>
+        <activiti:formProperty id="approve" name="是否批准" type="boolean" required="true"></activiti:formProperty>
+        <activiti:formProperty id="time" name="处理时间" type="date" datePattern="MM-dd-yyyy hh:mm" required="true"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <endEvent id="endEvent" name="结束流程"></endEvent>
+    <exclusiveGateway id="districtDecideApprove" name="区县审批校验"></exclusiveGateway>
+    <exclusiveGateway id="cityDecideApprove" name="市级审批校验"></exclusiveGateway>
+    <sequenceFlow id="sid-3ACABF48-74AF-4BF1-8E02-EE8CA0F217F1" sourceRef="cityApprove" targetRef="cityDecideApprove"></sequenceFlow>
+    <sequenceFlow id="sid-87D61179-D3B8-4B67-89F4-C785D3B7D492" sourceRef="districtApprove" targetRef="districtDecideApprove"></sequenceFlow>
+    <sequenceFlow id="sid-44FCAC03-78DD-4049-A88F-F65A11EA4339" sourceRef="siteProcess" targetRef="districtApprove"></sequenceFlow>
+    <sequenceFlow id="sid-565FB677-47C3-424D-93D2-790B604D8EB2" name="同意" sourceRef="districtDecideApprove" targetRef="cityApprove">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${approve == true}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="sid-FEA93EA6-A18F-4685-BDD0-1B7FFB9B7EF7" name="拒绝" sourceRef="districtDecideApprove" targetRef="siteProcess">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${approve == false}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="sid-19030BA1-16F1-4592-A99D-A05B3AA4EBF6" name="拒绝" sourceRef="cityDecideApprove" targetRef="siteProcess">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${approve == false}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="sid-0369F120-1561-409C-A505-29EFA78B9B36" name="同意" sourceRef="cityDecideApprove" targetRef="endEvent">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${approve == true}]]></conditionExpression>
+    </sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_site-alarm-process">
+    <bpmndi:BPMNPlane bpmnElement="site-alarm-process" id="BPMNPlane_site-alarm-process">
+      <bpmndi:BPMNShape bpmnElement="startEvent" id="BPMNShape_startEvent">
+        <omgdc:Bounds height="30.0" width="29.999999999999986" x="120.00000000000001" y="145.00000000000003"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="siteProcess" id="BPMNShape_siteProcess">
+        <omgdc:Bounds height="79.99999999999999" width="99.99999999999997" x="225.00000000000003" y="120.00000000000001"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="districtApprove" id="BPMNShape_districtApprove">
+        <omgdc:Bounds height="79.99999999999999" width="99.99999999999994" x="435.00000000000006" y="120.00000000000001"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="cityApprove" id="BPMNShape_cityApprove">
+        <omgdc:Bounds height="79.99999999999999" width="100.0" x="735.0000000000001" y="120.00000000000001"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endEvent" id="BPMNShape_endEvent">
+        <omgdc:Bounds height="28.0" width="28.0" x="1035.0000000000002" y="146.00000000000003"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="districtDecideApprove" id="BPMNShape_districtDecideApprove">
+        <omgdc:Bounds height="40.0" width="40.0" x="600.0000000000002" y="140.00000000000014"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="cityDecideApprove" id="BPMNShape_cityDecideApprove">
+        <omgdc:Bounds height="40.0" width="40.0" x="913.5000000000002" y="140.0000000000001"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="sid-87D61179-D3B8-4B67-89F4-C785D3B7D492" id="BPMNEdge_sid-87D61179-D3B8-4B67-89F4-C785D3B7D492">
+        <omgdi:waypoint x="535.0" y="160.1845018450185"></omgdi:waypoint>
+        <omgdi:waypoint x="600.4259259259261" y="160.42592592592604"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sid-B8BEA361-BE38-463E-89BA-CB25494546DB" id="BPMNEdge_sid-B8BEA361-BE38-463E-89BA-CB25494546DB">
+        <omgdi:waypoint x="150.0" y="160.00000000000003"></omgdi:waypoint>
+        <omgdi:waypoint x="225.00000000000003" y="160.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sid-19030BA1-16F1-4592-A99D-A05B3AA4EBF6" id="BPMNEdge_sid-19030BA1-16F1-4592-A99D-A05B3AA4EBF6">
+        <omgdi:waypoint x="934.0000000000002" y="179.5000000000001"></omgdi:waypoint>
+        <omgdi:waypoint x="934.0000000000002" y="272.99999999999994"></omgdi:waypoint>
+        <omgdi:waypoint x="250.0" y="272.99999999999994"></omgdi:waypoint>
+        <omgdi:waypoint x="250.0" y="200.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sid-565FB677-47C3-424D-93D2-790B604D8EB2" id="BPMNEdge_sid-565FB677-47C3-424D-93D2-790B604D8EB2">
+        <omgdi:waypoint x="639.5579268292686" y="160.44207317073185"></omgdi:waypoint>
+        <omgdi:waypoint x="735.0000000000001" y="160.1519756838906"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sid-0369F120-1561-409C-A505-29EFA78B9B36" id="BPMNEdge_sid-0369F120-1561-409C-A505-29EFA78B9B36">
+        <omgdi:waypoint x="953.0829694323146" y="160.41703056768569"></omgdi:waypoint>
+        <omgdi:waypoint x="1035.000132323266" y="160.0608689898989"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sid-3ACABF48-74AF-4BF1-8E02-EE8CA0F217F1" id="BPMNEdge_sid-3ACABF48-74AF-4BF1-8E02-EE8CA0F217F1">
+        <omgdi:waypoint x="835.0000000000001" y="160.16778523489938"></omgdi:waypoint>
+        <omgdi:waypoint x="913.9326599326602" y="160.43265993266004"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sid-44FCAC03-78DD-4049-A88F-F65A11EA4339" id="BPMNEdge_sid-44FCAC03-78DD-4049-A88F-F65A11EA4339">
+        <omgdi:waypoint x="325.0" y="160.0"></omgdi:waypoint>
+        <omgdi:waypoint x="435.00000000000006" y="160.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sid-FEA93EA6-A18F-4685-BDD0-1B7FFB9B7EF7" id="BPMNEdge_sid-FEA93EA6-A18F-4685-BDD0-1B7FFB9B7EF7">
+        <omgdi:waypoint x="620.5204617380693" y="179.47953826193103"></omgdi:waypoint>
+        <omgdi:waypoint x="620.5204617380693" y="239.99999999999994"></omgdi:waypoint>
+        <omgdi:waypoint x="300.0" y="239.99999999999994"></omgdi:waypoint>
+        <omgdi:waypoint x="300.0" y="200.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>
